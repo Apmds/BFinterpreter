@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g
 BIN_DIR = bin
-TARGET = $(BIN_DIR)/myprog
+TARGET = $(BIN_DIR)/bfint
 OBJS = $(BIN_DIR)/main.o
 
 all: $(TARGET)

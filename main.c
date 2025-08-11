@@ -12,8 +12,16 @@
 #define OUTPUT '.'
 #define LOOP_START '['
 #define LOOP_END ']'
+#define DEBUG_SYMBOL '#'
 
-bool is_bf_char(char c) {
+#define USAGE_STR "Usage: bfint [-d] [-h] program\n"
+#define DESCRIPTION_STR "Runs the program file using a Brainfuck interpreter.\n\n\
+Arguments:\n\
+    -d - Runs the interpreter in debug mode ('#' prints debug information).\n\
+    -h - Prints this message and leaves.\
+"
+
+bool is_bf_char(char c, bool debug) {
     return c == SHIFT_LEFT
         || c == SHIFT_RIGHT
         || c == ADD
@@ -22,10 +30,15 @@ bool is_bf_char(char c) {
         || c == OUTPUT
         || c == LOOP_START
         || c == LOOP_END
+        || (c == DEBUG_SYMBOL && debug)
     ;
 }
 
 bool is_valid_program(char* program) {
+    if (program == NULL) {
+        return false;
+    }
+
     char* c = program;
     int loop_nesting = 0;
     while (*c != '\0') {
@@ -42,8 +55,23 @@ bool is_valid_program(char* program) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc <= 1) {
-        fprintf(stderr, "Must provide program!\n");
+    bool debug_mode = false;
+    char* filename = NULL;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-d") == 0) {
+            debug_mode = true;
+        }
+        else if (strcmp(argv[i], "-h") == 0) {
+            printf(USAGE_STR DESCRIPTION_STR);
+            return EXIT_SUCCESS;
+        }
+        else {
+            filename = argv[i];
+        }
+    }
+
+    if (argc <= 1 || filename == NULL) {
+        fprintf(stderr, USAGE_STR "Must provide program!\n");
         return EXIT_FAILURE;
     }
 
@@ -63,7 +91,7 @@ int main(int argc, char *argv[]) {
         int buf_instruction_size = 0; // Size of buffer (considering only the needed characters)
         char* c = buf;
         while (*c != '\0') {
-            if (is_bf_char(*c)) {
+            if (is_bf_char(*c, debug_mode)) {
                 buf_instruction_size++;
             }
 
@@ -78,7 +106,7 @@ int main(int argc, char *argv[]) {
         // Read the buffer again to put the data in the program
         c = buf;
         while (*c != '\0') {
-            if (is_bf_char(*c)) {
+            if (is_bf_char(*c, debug_mode)) {
                 program[idx++] = *c;
             }
 
@@ -161,6 +189,9 @@ int main(int argc, char *argv[]) {
                 }
                 instruction_pointer++;
             }
+            break;
+        case DEBUG_SYMBOL:
+            printf("DEBUG: data_ptr: %d; value: %c\n", data_pointer, data[data_pointer]);
             break;
         }
 
