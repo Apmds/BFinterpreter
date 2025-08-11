@@ -101,32 +101,72 @@ int main(int argc, char *argv[]) {
     char* instruction_pointer = program;
     while (*instruction_pointer != '\0') {
         char c = *instruction_pointer;
-        if (c == SHIFT_RIGHT) {
+        bool skip_instruction_increment = false; // True when an instruction needs to increment the instruction pointer
+
+        switch (c) {
+        case SHIFT_RIGHT:
             data_pointer++;
             while (data_pointer > sizeof(data)-1) {
                 data_pointer -= sizeof(data);
             }
-        }
-        if (c == SHIFT_LEFT) {
+            break;
+        case SHIFT_LEFT:
             data_pointer--;
             while (data_pointer < 0) {
                 data_pointer += sizeof(data);
             }
-        }
-        if (c == ADD) {
+            break;
+        case ADD:
             data[data_pointer]++;
-        }
-        if (c == SUB) {
+            break;
+        case SUB:
             data[data_pointer]--;
-        }
-        if (c == INPUT) {
+            break;
+        case INPUT:
             data[data_pointer] = getchar();
-        }
-        if (c == OUTPUT) {
+            break;
+        case OUTPUT:
             printf("%c", data[data_pointer]);
+            break;
+        case LOOP_START:
+            if (data[data_pointer] == 0) {
+                // Move instruction_pointer to after the matching LOOP_END
+                skip_instruction_increment = true;
+                int nesting = 1;
+                while (nesting != 0) {
+                    instruction_pointer++;
+                    if (*instruction_pointer == LOOP_START) {
+                        nesting++;
+                    }
+                    if (*instruction_pointer == LOOP_END) {
+                        nesting--;
+                    }
+                }
+                instruction_pointer++;
+            }
+            break;
+        case LOOP_END:
+            if (data[data_pointer] != 0) {
+                // Move instruction_pointer to after the matching LOOP_START
+                skip_instruction_increment = true;
+                int nesting = 1;
+                while (nesting != 0) {
+                    instruction_pointer--;
+                    if (*instruction_pointer == LOOP_START) {
+                        nesting--;
+                    }
+                    if (*instruction_pointer == LOOP_END) {
+                        nesting++;
+                    }
+                }
+                instruction_pointer++;
+            }
+            break;
         }
 
-        instruction_pointer++;
+        if (!skip_instruction_increment) {
+            instruction_pointer++;
+        }
     }
     
     free(program);
