@@ -21,7 +21,7 @@ Printing numbers from 9 to 0
     ]
     >
     
-    Subtracts 48 both from cell 1 and from cell 3, leaving everything as it was in the start of the iteration
+    Subtracts 48 both from cell 1 and from cell 3 leaving everything as it was in the start of the iteration
     [ << - >> - ] <<
 
     Decrementing cell 1 to end iteration
