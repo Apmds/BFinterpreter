@@ -85,7 +85,6 @@ int main(int argc, char *argv[]) {
             c++;
         }
     }
-    printf("Program: %s\n", program);
     fclose(file);
 
     // Validating program
@@ -95,10 +94,40 @@ int main(int argc, char *argv[]) {
     }
 
     // Data buffer
-    char data[30000];
+    unsigned char data[30000] = {0};
+    int data_pointer = 0; // Index in the data buffer (wraps around)
 
+    // Execute the program
+    char* instruction_pointer = program;
+    while (*instruction_pointer != '\0') {
+        char c = *instruction_pointer;
+        if (c == SHIFT_RIGHT) {
+            data_pointer++;
+            while (data_pointer > sizeof(data)-1) {
+                data_pointer -= sizeof(data);
+            }
+        }
+        if (c == SHIFT_LEFT) {
+            data_pointer--;
+            while (data_pointer < 0) {
+                data_pointer += sizeof(data);
+            }
+        }
+        if (c == ADD) {
+            data[data_pointer]++;
+        }
+        if (c == SUB) {
+            data[data_pointer]--;
+        }
+        if (c == INPUT) {
+            data[data_pointer] = getchar();
+        }
+        if (c == OUTPUT) {
+            printf("%c", data[data_pointer]);
+        }
 
-    int data_pointer = 0;
+        instruction_pointer++;
+    }
     
     free(program);
     return EXIT_SUCCESS;
